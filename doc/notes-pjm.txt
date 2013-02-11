@@ -1,0 +1,599 @@
+# goto MAKEKNOWNLENSSTTACKPNGS
+# goto MAKEINDIVIDUALDS9PNGS
+goto MAKEANNOTATEDPNGSOFKNOWNLENSES
+# ============================================================================
+# 2011-04-25 (Monday) 11:23 CEST
+
+# Heidelberg with Eric: what do known lenses look like in PS1 3pi survey?
+
+# Select 10 lenses from SDSS, query 3pi PS1 data for them. 
+# Criteria:
+
+#   * Galaxy-scale: imsep < 4"
+#   * Faint: icor > 17
+#   * Mixture of unresolved and resolved in SDSS (small vs wide)
+
+set catdir = $cwd/knownlenses/catalogs
+mkdir -p $catdir 
+
+set master = $catdir/SDSS-knownlenses.txt
+set cat = $catdir/SDSS-smallquads.txt
+
+\rm -f $cat ; touch $cat
+
+echo '# Catalog of small-separation quad lenses, from Oguri et al SQLS list\
+#    http://www-utap.phys.s.u-tokyo.ac.jp/~sdss/sqls/lens.html\
+# PJM, Heidelberg 2011-08-22 (Monday) \
+# \
+# Selection criteria:\
+#   * 3 or 4 images \
+#   * Galaxy-scale: imsep < 4" \
+# ' >> $cat
+head -1 $master >> $cat
+grep -v '#' $master | awk '{if ($5 < 4 && $4 > 2) print $0}' >> $cat
+
+# OK good - 9 objects.
+
+# Eric is getting 5' square postage stamps from PS1, and also catalogs 
+# of all objects - SDSS measuremenst and PS1 measurements. Download SDSS jpgs
+# for comparison! Get 22.5 limited catalogs too.
+
+set targets = `grep -v '#' $cat | awk '{print $1}'`
+
+set ssdir = $cwd/knownlenses/skyserver
+mkdirf $ssdir 
+
+foreach target ( $targets )
+  set ra  = `grep $target $cat | awk '{print $2}'`  
+  set dec = `grep $target $cat | awk '{print $3}'`
+  set sep = `grep $target $cat | awk '{print $5}'`
+
+  set w = 5
+  set r = `echo $w | awk '{printf "%.1f\n", ($1/2.0)*sqrt(2.0)}'`
+  set logfile = $target.askSDSS.log         
+  askSDSS $ra $dec -f -w $w -c -r $r -m 22.5 -x > $logfile
+  set objcat = `grep '\.cat' $logfile`
+  set newobjcat = ${target}_r.lt.${r}arcmin_i.lt.22.5.cat
+  mv $objcat $newobjcat
+  set jpg = `grep '\.jpg' $logfile`
+  set newjpg = ${target}_${w}x${w}arcmin.jpg
+  mv $jpg $newjpg
+  \rm -f *.csv junk.html
+  du -h $newjpg
+  wc -l $newobjcat
+  
+  set ww = 10
+  set w = 0.17
+  set logfile = junk         
+  askSDSS $ra $dec -f -w $w -x > $logfile
+  set jpg = `grep '\.jpg' $logfile`
+  set newjpg = ${target}_${ww}x${ww}arcsec.jpg
+  mv $jpg $newjpg
+  \rm -f *.csv junk*
+  du -h $newjpg
+  
+end  
+
+# Gallery of systems:
+
+set jpgs = ()
+foreach target ( $targets )
+  set jpgs = ( $jpgs ${target}*jpg )
+end   
+
+gallery.pl -t -s -pdf -o SDSS-smallquads.pdf -x 2 -y 2 $jpgs
+
+# ============================================================================
+# 2011-08-22 (Monday) 15:23 CEST
+
+# Got PS1 cutouts from Eric, in data directory.
+# Make cutout images!
+
+set DATA_DIR = $PS1QLS_DIR/knownlenses/data
+set CUTOUT_DIR = $PS1QLS_DIR/knownlenses/cutouts
+set CATALOG_DIR = $PS1QLS_DIR/knownlenses/catalogs
+
+set cat = $CATALOG_DIR/SDSS-smallquads.txt
+set targets = `grep -v '#' $cat | awk '{print $1}'`
+
+set w = 10
+
+foreach target ( $targets )
+
+  mkdir -p $CUTOUT_DIR/$target
+  chdir $CUTOUT_DIR/$target
+
+  set ra  = `grep $target $cat | awk '{print $2}'`  
+  set dec = `grep $target $cat | awk '{print $3}'`
+  
+  proto_cutout.py -n $target -s 'sci' $ra $dec $w \
+    $DATA_DIR/*skycell.????.???.fits
+  proto_cutout.py -n $target -s 'var' $ra $dec $w \
+    $DATA_DIR/*skycell.????.???.wt.fits
+
+end
+
+# Oops - needed to go back and add parent filename to the header, and some
+# comments... Also, better to keep cutouts in separate directories, doing
+# this after the fact and editing lines above... so they *may* not work...
+# 
+# foreach target ( $targets )
+#   mkdir -p $CUTOUT_DIR/$target
+#   mv -v $CUTOUT_DIR/$target*.*  $CUTOUT_DIR/$target/.
+# end  
+
+# OK - view with ds9!!
+
+foreach target ( $targets )
+
+  chdir $CUTOUT_DIR/$target
+  
+  ds9 -geometry 800x700 -scale limits -10 150 -invert -zoom 2 ${target}_*_sci.fits \
+     -saveas png ${target}_10x10arcsec_ds9gallery.png -exit
+  
+end
+
+# Excellent. Now - how about doing a simple stack, in each filter, and then
+# making a colour jpg? Argument to python script - list of sci files,
+# look for wht files automatically - then read in images, detect filter
+# and make weighted average image, plus combined weight.  Need to detect
+# and insist on constant image size, deal with nan values, copy header
+# from first file, add comments and new keywords (list of input files)
+# Either use weights from files (searched for by whtsuffix) or do sums
+# of images unweighted.
+
+MAKEKNOWNLENSSTTACKPNGS:
+
+foreach target ( $targets )
+
+#   proto_stack.py -n ${target}_10x10arcsec -s 'var' \
+#     ${target}_10x10arcsec_55*_?_sci.fits
+
+  chdir $CUTOUT_DIR/$target
+  
+  proto_rgb.py -n ${target}_10x10arcsec\
+               ${target}_10x10arcsec_z_sci.fits \
+               ${target}_10x10arcsec_r_sci.fits \
+               ${target}_10x10arcsec_g_sci.fits
+
+end
+
+# Choice of scales needs work...
+
+goto FINISH
+
+# ============================================================================
+# 2011-08-27 (Saturday) 00:06 CEST
+
+# Copying across minicats form Eric, in 5" radius apertures centred on known
+# lens positions:
+# 
+# On aida77:
+# 
+cp /a77d1/PS1_LQS/known_lenses/kl_* 
+  ~/work/stronglensing/PanSTARRS/PS1QLS/knownlenses/data/
+
+# OK, got them - they need  renaming, according to target name/ radec.
+
+du -h kl*
+
+# Eric recommends this resource for parsing flags:
+
+lynx --dump -nolist \
+  http://svn.pan-starrs.ifa.hawaii.edu/trac/ipp/browser/trunk/psModules/src/objects/pmSourceMasks.h  \
+    > pmSourceMasks.h.txt
+
+
+# Renaming files:
+# 
+# Here's the list of lenses Eric grabbed:
+cat data/morganson.20110715163729.radec
+# Prepend 1-9 by hand, and look up names (also by hand):
+
+# 1  141.232480   2.323610  SDSSJ0924+0219
+# 2  174.515550   3.249390  SDSSJ1138+0314
+# 3  192.781580  29.594590  SDSSJ1251+2935
+# 4  202.577710  18.175600  SDSSJ1330+1810
+# 5   23.648625  -9.517472  PMNJ0134-0931
+# 6  123.38042   25.750889  HS0810+2554
+# 7  137.865070   5.848360  RXJ0911+0551
+# 8  169.570630   7.766160  PG1115+080
+# 9  213.942670  11.495400  H1413+117
+
+set names = (\
+SDSSJ0924+0219 \
+SDSSJ1138+0314 \
+SDSSJ1251+2935 \
+SDSSJ1330+1810 \
+PMNJ0134-0931 \
+HS0810+2554 \
+RXJ0911+0551 \
+PG1115+080 \
+H1413+117 \
+)
+
+foreach i ( `seq 9` )
+  cp -v data/kl_${i}.fits cutouts/${names[$i]}/${names[$i]}_PS1-detections.fits
+end 
+
+ 
+# ============================================================================
+# 2011-08-27 (Saturday) 13:56 CEST
+
+# Simple plots of sources in there. Would like to overlay on FITS images, but
+# also want to just display data in catalog. Show side by side too start with?
+# Or write out ds9 region file?
+
+# Here are the source catalog (kl_* files) columns:
+ 
+det_id : type=>i8, 
+exp_id : type=>i8, 
+chip_id : type=uint8, 
+survey : type=|S4, 
+ra : type=>f8, 
+dec : type=>f8, 
+mjd_obs : type=>f8, 
+l : type=>f8, 
+b : type=>f8, 
+flags : type=>i4, 
+flags2 : type=>i4, 
+n_frames : type=>i2, 
+cached : type=>i2, 
+ipp_idet : type=>i4, 
+x_psf : type=>f4, 
+y_psf : type=>f4, 
+x_psf_sig : type=>f4, 
+y_psf_sig : type=>f4, 
+posangle : type=>f4, 
+pltscale : type=>f4, 
+moments_xx : type=>f4, 
+moments_xy : type=>f4, 
+moments_yy : type=>f4, 
+moments_m3c : type=>f4, 
+moments_m3s : type=>f4, 
+moments_m4c : type=>f4, 
+moments_m4s : type=>f4, 
+moments_r1 : type=>f4, 
+moments_rh : type=>f4, 
+kron_flux : type=>f4, 
+kron_flux_err : type=>f4, 
+kron_flux_inner : type=>f4, 
+kron_flux_outer : type=>f4, 
+filterid : type=|S6, 
+psf_inst_mag : type=>f4, 
+psf_inst_mag_sig : type=>f4, 
+psf_inst_flux : type=>f4, 
+psf_inst_flux_sig : type=>f4, 
+ap_mag : type=>f4, 
+ap_mag_raw : type=>f4, 
+ap_mag_radius : type=>f4, 
+peak_flux_as_mag : type=>f4, 
+cal_psf_mag : type=>f4, 
+cal_psf_mag_sig : type=>f4, 
+sky : type=>f4, 
+sky_sigma : type=>f4, 
+psf_chisq : type=>f4, 
+cr_nsigma : type=>f4, 
+ext_nsigma : type=>f4, 
+psf_major : type=>f4, 
+psf_minor : type=>f4, 
+psf_theta : type=>f4, 
+psf_qf : type=>f4, 
+psf_qf_perfect : type=>f4, 
+psf_ndof : type=>i4, 
+psf_npix : type=>i4
+
+# Template ds9 regions:
+
+more template.reg
+
+# Region file format: DS9 version 4.1
+# Filename: ../cutouts/SDSSJ1330+1810_10x10arcsec_z_sci.fits
+global color=green dashlist=8 3 width=1 font="helvetica 10 normal roman" select=
+1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1
+fk5
+# text(202.57653,18.176839) text={z band}
+ellipse(202.57781,18.175651,1",0.4",149.99999) # color=magenta width=2
+circle(202.57768,18.175804,3.88638") # color=black dash=1
+# text(202.57881,18.176839) color=cyan text={N sources}
+circle(202.57653,18.174505,0.5") # color=black width=4
+
+# ============================================================================
+# 2011-10-26 (Wednesday) 18:10 BST
+
+# OK, need python script to read in a source catalog and make region files
+# for each observation. 
+
+# Need to match catalogued sources with images, called eg
+
+SDSSJ1330+1810_10x10arcsec_55729.34974_y_sci.fits
+
+# ie name+'_'+str(mjdobs)+'_'+filter+'_'+'sci.fits'
+# region file should be like this too - code from cutout script (split off
+# into cutouts library in proto).
+
+# Will have to loop over filters, mjdobs values - call with input as a source
+# catalog, which we assume is of one small patch of sky. Input name as well
+
+# Sources represented as ellipses, with a,b,phi from moments - do this first 
+# for all sources, using array operations. Centres of ellipses in world coords
+
+
+cd ~/work/stronglensing/PanSTARRS/PS1QLS/knownlenses/cutouts
+
+$PROTO_DIR/python/proto_make_source_regions.py -v -n H1413+117_10x10arcsec \
+  ../data/kl_9.fits
+
+$PROTO_DIR/python/proto_make_source_regions.py -v -n PG1115+080_10x10arcsec \
+  ../data/kl_8.fits
+
+# Need to rename kl fits files sensibly...
+
+# Remake ds9 images:
+
+MAKEINDIVIDUALDS9PNGS:
+
+foreach regfile ( H1413+117_10x10arcsec_5*.reg )
+# foreach regfile ( PG1115+080_10x10arcsec_5*.reg )
+  set fitsfile = $regfile:r.fits
+  set pngfile = $fitsfile:r.png
+  ls $fitsfile $regfile
+  ds9 -geometry 600x800 -scale limits -10 150 -zoom 12 \
+#      - invert \
+     $fitsfile \
+#      -region $regfile\
+     -saveas png $pngfile -exit
+  du -h $pngfile
+end
+
+goto FINISH:
+
+
+# Notes:
+# - possible 1,1 pixel offset between measurement catalogs
+# - faint sources often not detected
+# - occasional high ellipticity for sources, not justified
+# - sometimes image has no detected sources, fine - but also sometimes catalog
+#   has entries where there are no good pixels... How do these happen?
+# - H1413 is never resolved into 4 sources
+# - PG115 is never detected as three sources
+
+# ============================================================================
+# 2012-06-26 (Tuesday) 13:30 BST
+
+# Try running SExtractor to improve catalogs.
+# Notes:
+# - large 5' cutouts contain so few objects that PSF estimation *within* tiny
+#   cutout, during simultaneous catalog or image fit, is likely going to 
+#   do better.
+# - only need run sex on tiny cutouts.
+# - organise cutouts into subdirs by target name, then run sex on all images
+#   in this subdir to make catalog containing all data. To use some of the
+#   same tools as for PS1 catalogs, must retain some information from FITS image
+#   file header, like MJDobs and filter. Make sex option in
+#   proto_source_catalog. Have to add columns to basic sex output... Have it 
+#   write out FITS table, but then add column based on FITS image.
+# - required sex params: ra,dec, moments_xx, moments_yy, moments_xy, flags,
+#     flux_auto and error, mag_auto and error (cf kron)
+# - measure moments relative to WCS indeg, 
+#     but report them in pixels like in PS1 cats
+# - required header params: pltscale, filterid, mjd_obs
+# - have to set up sex files, in proto/sex dir
+
+mkdirf $PROTO_DIR/sex
+cp $WORK_DIR/stronglensing/LSST/simulations/imsim/sex/* .
+mv first225quads.sex proto.sex
+mv first225quads.param proto.param
+
+# Now edit by hand...
+
+grep xxx proto.sex
+# MAG_ZEROPOINT    xxxZPT         # magnitude zero-point
+# GAIN             xxxGAIN        # detector gain in e-/ADU
+
+# Have to pull these out of image, and sed into place.
+
+# Python script to run sex on every image, and concatenate catalogs to look
+# like PS1 outputs.
+
+# OK, testing in $CUTOUT_DIR/H1413+117
+
+set DATA_DIR = $PS1QLS_DIR/knownlenses/data
+set CUTOUT_DIR = $PS1QLS_DIR/knownlenses/cutouts
+set CATALOG_DIR = $PS1QLS_DIR/knownlenses/catalogs
+
+set target = H1413+117 ; cd $CUTOUT_DIR/$target
+proto_sex.py -v -n ${target}_10x10arcsec \
+             ${target}_10x10arcsec_?????.?????_*sci.fits
+
+# Result should be ${target}_10x10arcsec_sex.fits
+
+# Now need to remake regions, and ds9 images. Actually better to plot from
+# within python, save pngs directly. Script that takes in a list of images,
+# and makes a postcard plot of each one.
+
+# Cannot read in FITS table written with ATpy! Have to use ipac format instead
+# Duhhh :-/
+
+# Compare PS1 IPP to SExtractor:
+
+proto_plot_sources.py -v -s H1413+117_PS1-detections.fits \
+                            H1413+117_10x10arcsec_sources.ipac \
+                            H1413+117_10x10arcsec_*_z_sci.fits
+
+# Tuning SExtractor:
+\rm *.sex *.param *.conv ; \
+proto_sex.py -v -n H1413+117_10x10arcsec \
+             H1413+117_10x10arcsec_?????.?????_z_sci.fits && \
+proto_plot_sources.py -v -s H1413+117_PS1-detections.fits \
+                            H1413+117_10x10arcsec_sources.ipac \
+                            H1413+117_10x10arcsec_*_z_sci.fits
+
+# Single pixel at 5 sigma seems to work OK...
+
+# Moments/interpretation is odd - we added 90deg byhand to get pylab what it
+# wants. 
+
+# Flags are useless - nearby objects are equiv to bad pixels!
+
+# OK, have nice comparison of number of sources. 
+
+rename4pdflatex *png
+gallery.pl -x 6 -y 6 -pdf *annotated.png -o H1413+117_10x10arcsec_annotated_gallery.pdf
+
+# Statistics: histogram? Need more than one source detected, more than once...
+# Need simple script to compute this, and other stats. Returns 1 or 0 according to 
+# if multiple sources are detected.
+
+# For now, make annotated pngs for every observation of every lens:
+
+MAKEANNOTATEDPNGSOFKNOWNLENSES:
+
+set DATA_DIR = $PS1QLS_DIR/knownlenses/data
+set CUTOUT_DIR = $PS1QLS_DIR/knownlenses/cutouts
+set CATALOG_DIR = $PS1QLS_DIR/knownlenses/catalogs
+
+set targets = (\
+SDSSJ0924+0219 \
+SDSSJ1138+0314 \
+SDSSJ1251+2935 \
+SDSSJ1330+1810 \
+PMNJ0134-0931 \
+HS0810+2554 \
+RXJ0911+0551 \
+PG1115+080 \
+H1413+117 \
+)
+
+foreach target ( $targets )
+# foreach target ( H1413+117 )
+# foreach target ( PG1115+080 ) # Testing why this failed - it was the filterid zeros
+
+  chdir $CUTOUT_DIR/$target
+  
+  \rm -f *.sex *.param *.conv ; \
+  
+  proto_sex.py -v -n ${target}_10x10arcsec \
+             ${target}_10x10arcsec_?????.?????_*sci.fits
+
+  proto_plot_sources.py -v -s ${target}_PS1-detections.fits \
+                              ${target}_10x10arcsec_sources.ipac \
+                              ${target}_10x10arcsec_*_?_sci.fits
+                              
+  rename4pdflatex *annotated.png
+  gallery.pl -x 6 -y 6 -pdf *annotated.png \
+     -o ${target}_10x10arcsec_annotated_gallery.pdf
+     
+end
+
+chdir $CUTOUT_DIR
+
+goto FINISH
+
+# ============================================================================
+# 2012-07-02 (Monday) 18:50 CEST
+
+# Remake list of known lenses from SQLS, to get complete list.
+
+wget -O SQLS_2012-07-02.html http://www-utap.phys.s.u-tokyo.ac.jp/~sdss/sqls/lens.html
+# lynx -dump -nolist http://www-utap.phys.s.u-tokyo.ac.jp/~sdss/sqls/lens.html > SQLS_2012-07-02.lynx
+
+# Line numbers:
+set index = `grep -n 'images/' SQLS_2012-07-02.html | cut -d':' -n1`
+foreach k ( $index )
+  tail -n +$k SQLS_2012-07-02.html | head -10 > junk
+  set url = `grep cas.sdss.org junk | cut -d'"' -f2`
+  set 
+end
+
+# TO BE CONTINUED...
+
+# ============================================================================
+# 2012-07-04 (Wednesday) 14:36 CEST
+
+# Data storage etc with Eric.
+
+# Phase 1 search generates target list. 
+#    Download 120 pixel postage stamps, keep in a data directory
+
+# Phase 2: 
+# for each target:
+#    make all 10" cutouts
+#    run SExtractor
+#    measure Ns
+# Refine target list to objects with multiple components: candidates
+
+# Phase 3: 
+# for each candidate:
+#    run LensTractor on all images
+#    compute Bayes factor 
+# Refine candidate list to objects with BF > threshold
+
+
+# Postage stamp book-keeping
+# see eg data area on aida77
+
+setenv PS1QLS_DATA_DIR /a77d1/PS1QLS
+
+#   Starting point is an initial catalog containing ra, dec and optionally a 
+#   name. This script does three things:
+#      1) Build a directory structure to hold all data
+#      2) Call pstamp and start downloading postage stamp images
+#      3) Make small catalogs of PS1 detections to correspond to the images
+#   
+#   Here's the plan for the directory structure:
+#
+#      $PS1QLS_DATA_DIR/$search/catalogs  - contains search catalog, and then refinements
+#                                           including rabin, decbin of each target
+# 
+#      $PS1QLS_DATA_DIR/$search/$skypatch/$target - contains all products for each target
+#
+#   Nb. skypatches should be "square" and named ra1_dec1_ra2_dec2, eg 330_-20_340_-10
+#   These can be of any size, with the patch width given as an argument to this script.
+#   We need a lookup table with target ra,dec,target,skypatch, placed in catalogs.
+# 
+#      $PS1QLS_DATA_DIR/$search/$skypatch/$target/raw  - downloaded from pstamp, with long names
+#      $PS1QLS_DATA_DIR/$search/$skypatch/$target/raw/*.fits     Science images
+#      $PS1QLS_DATA_DIR/$search/$skypatch/$target/raw/*.cmf      Detection catalogs
+#      $PS1QLS_DATA_DIR/$search/$skypatch/$target/raw/*.wt.fits  Variance images
+#      $PS1QLS_DATA_DIR/$search/$skypatch/$target/raw/*.psf      PSF images (?)
+#
+#   Nb. pstamp will download into a directory called morganson.20120702113542
+#   or something - this needs emptying into raw and removing.
+#
+#      $PS1QLS_DATA_DIR/$search/$skypatch/$target/cutouts - smaller cutouts, or links, 
+#                                                           named $target_$mjd_$filter_sci[var].fits
+#      $PS1QLS_DATA_DIR/$search/$skypatch/$target/sex     - SExtractor outputs
+#      $PS1QLS_DATA_DIR/$search/$skypatch/$target/models  - LensTractor outputs
+#      $PS1QLS_DATA_DIR/$search/$skypatch/$target/www     - pngs,html etc
+#      $PS1QLS_DATA_DIR/$search/$skypatch/$target/log     - progress reports
+#
+
+# Tricky: which target has data in which book? Solved by deciding to download
+# postage stamps *one target at a time*.
+
+# $search == $project
+
+# Cutouts: either cut from postage stamps, or just links to downloaded images.
+# -> Need proto tool for making links. This is the standard! 
+# Some images have 0.2" pixels, some have 0.25". Cutoff was at some date...
+# Need to be able to cope with both. All are still N-E aligned and well 
+# registered.
+
+# Currently, data is in directories as follows:
+
+# morganson.20120702113542.fits
+# morganson.20120702113542
+# morganson.20120702113542/*.fits     Science images
+# morganson.20120702113542/*.cmf      Detection catalogs
+# morganson.20120702113542/*.wt.fits  Variance images
+# morganson.20120702113542/*.psf      PSF images (?)
+
+# proto_minicats.sh combines cmf files for a given candidate - needs to write
+# to $PS1QLS_DATA_DIR/$search/targets/$target_PS1-detections.fits
+
+# All of this to be set up by proto_start_project.bash ! Under developmentby
+# Eric, managed by Phil.
+
+# ============================================================================
+FINISH:

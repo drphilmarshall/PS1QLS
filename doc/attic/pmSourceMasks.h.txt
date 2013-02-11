@@ -1,0 +1,207 @@
+
+   #search help Plain Text Original Format Parent directory start Search
+   Pan-STARRS IPP
+
+   [PanSTARRS4c_180.jpg]
+   Search: __________________ Search
+     * Login
+     * Preferences
+     * Help/Guide
+     * About Trac
+
+     * Wiki
+     * Timeline
+     * Roadmap
+     * Browse Source
+     * View Tickets
+     * Search
+
+Context Navigation
+
+     * Last Change
+     * Annotate
+     * Revision Log
+     _________________________________________________________________
+
+   IPP Software
+     * IPP Main Page
+     * IPP Description
+     * IPP Installation
+     * IPP Doxygen
+     * IPP Manuals
+     * IPP Wiki Index
+
+   Navigation
+     * PS Home
+     * PS Project *
+     * Old IPP Home *
+     * PS1SC Home
+     * PS1SC Wiki *
+
+   Tools
+     * FAQ pages
+     * IPP Trac Tickets
+     * IPP SVN Browser
+     * Wiki Help
+
+   IPP Links
+     * ippMonitor@MHPCC*
+     * ippMonitor@Manoa*
+     * PStamp Server*
+     * Ganglia*
+
+   Communication
+     * IPP Users maillist
+     * email lists (PS) *
+     * DRAV Info *
+     * IPP Blog
+
+   Pan-STARRS Links
+     * Camera
+     * Summit Wiki
+     * Haleakala Site Pages
+     * Mauna Kea Weather Center
+     * IfA
+     * PS1 Seeing
+
+   * -- restricted access
+
+root/trunk/psModules/src/objects/pmSourceMasks.h
+
+   View revision: ______
+   Visit:
+   [..................................] Go!
+   Revision 31670, 4.6 KB (checked in by eugene, 2 months ago)
+
+   merge from trunk : various minor issues (kron radii; I/O fixes)
+   Line
+   1 #ifndef PM_SOURCE_MASKS_H
+   2 #define PM_SOURCE_MASKS_H
+   3
+   4 // Bit flags to distinguish analysis results
+   5 // When adding to or subtracting from this list, please also modify
+   pmSourceMaskHeader
+   6 typedef enum {
+   7     PM_SOURCE_MODE_DEFAULT          = 0x00000000, ///< Initial
+   value: resets all bits
+   8     PM_SOURCE_MODE_PSFMODEL         = 0x00000001, ///< Source fitted
+   with a psf model (linear or non-linear)
+   9     PM_SOURCE_MODE_EXTMODEL         = 0x00000002, ///< Source fitted
+   with an extended-source model
+   10     PM_SOURCE_MODE_FITTED           = 0x00000004, ///< Source
+   fitted with non-linear model (PSF or EXT; good or bad)
+   11     PM_SOURCE_MODE_FAIL             = 0x00000008, ///< Fit
+   (non-linear) failed (non-converge, off-edge, run to zero)
+   12     PM_SOURCE_MODE_POOR             = 0x00000010, ///< Fit
+   succeeds, but low-SN, high-Chisq, or large (for PSF -- drop?)
+   13     PM_SOURCE_MODE_PAIR             = 0x00000020, ///< Source
+   fitted with a double psf
+   14     PM_SOURCE_MODE_PSFSTAR          = 0x00000040, ///< Source used
+   to define PSF model
+   15     PM_SOURCE_MODE_SATSTAR          = 0x00000080, ///< Source model
+   peak is above saturation
+   16     PM_SOURCE_MODE_BLEND            = 0x00000100, ///< Source is a
+   blend with other sources
+   17     PM_SOURCE_MODE_EXTERNAL         = 0x00000200, ///< Source based
+   on supplied input position
+   18     PM_SOURCE_MODE_BADPSF           = 0x00000400, ///< Failed to
+   get good estimate of object's PSF
+   19     PM_SOURCE_MODE_DEFECT           = 0x00000800, ///< Source is
+   thought to be a defect
+   20     PM_SOURCE_MODE_SATURATED        = 0x00001000, ///< Source is
+   thought to be saturated pixels (bleed trail)
+   21     PM_SOURCE_MODE_CR_LIMIT         = 0x00002000, ///< Source has
+   crNsigma above limit
+   22     PM_SOURCE_MODE_EXT_LIMIT        = 0x00004000, ///< Source has
+   extNsigma above limit
+   23     PM_SOURCE_MODE_MOMENTS_FAILURE  = 0x00008000, ///< could not
+   measure the moments
+   24     PM_SOURCE_MODE_SKY_FAILURE      = 0x00010000, ///< could not
+   measure the local sky
+   25     PM_SOURCE_MODE_SKYVAR_FAILURE   = 0x00020000, ///< could not
+   measure the local sky variance
+   26     PM_SOURCE_MODE_BELOW_MOMENTS_SN = 0x00040000, ///< moments not
+   measured due to low S/N
+   27     PM_SOURCE_MODE_BIG_RADIUS       = 0x00100000, ///< poor moments
+   for small radius, try large radius
+   28     PM_SOURCE_MODE_AP_MAGS          = 0x00200000, ///< source has
+   an aperture magnitude
+   29     PM_SOURCE_MODE_BLEND_FIT        = 0x00400000, ///< source was
+   fitted as a blend
+   30     PM_SOURCE_MODE_EXTENDED_FIT     = 0x00800000, ///< full
+   extended fit was used
+   31     PM_SOURCE_MODE_EXTENDED_STATS   = 0x01000000, ///< extended
+   aperture stats calculated
+   32     PM_SOURCE_MODE_LINEAR_FIT       = 0x02000000, ///< source
+   fitted with the linear fit
+   33     PM_SOURCE_MODE_NONLINEAR_FIT    = 0x04000000, ///< source
+   fitted with the non-linear fit
+   34     PM_SOURCE_MODE_RADIAL_FLUX      = 0x08000000, ///< radial flux
+   measurements calculated
+   35     PM_SOURCE_MODE_SIZE_SKIPPED     = 0x10000000, ///< size could
+   not be determined
+   36     PM_SOURCE_MODE_ON_SPIKE         = 0x20000000, ///< peak lands
+   on diffraction spike
+   37     PM_SOURCE_MODE_ON_GHOST         = 0x40000000, ///< peak lands
+   on ghost or glint
+   38     PM_SOURCE_MODE_OFF_CHIP         = 0x80000000, ///< peak lands
+   off edge of chip
+   39 } pmSourceMode;
+   40
+   41 // Bit flags to distinguish analysis results
+   42 // When adding to or subtracting from this list, please also modify
+   pmSourceMaskHeader
+   43 typedef enum {
+   44     PM_SOURCE_MODE2_DEFAULT          = 0x00000000, ///< Initial
+   value: resets all bits
+   45     PM_SOURCE_MODE2_DIFF_WITH_SINGLE = 0x00000001, ///< diff source
+   matched to a single positive detection
+   46     PM_SOURCE_MODE2_DIFF_WITH_DOUBLE = 0x00000002, ///< diff source
+   matched to positive detections in both images
+   47     PM_SOURCE_MODE2_MATCHED          = 0x00000004, ///< diff source
+   matched to positive detections in both images
+   48
+   49     PM_SOURCE_MODE2_ON_SPIKE         = 0x00000008, ///< > 25% of
+   (PSF-weighted) pixels land on diffraction spike
+   50     PM_SOURCE_MODE2_ON_STARCORE      = 0x00000010, ///< > 25% of
+   (PSF-weighted) pixels land on starcore
+   51     PM_SOURCE_MODE2_ON_BURNTOOL      = 0x00000020, ///< > 25% of
+   (PSF-weighted) pixels land on burntool
+   52     PM_SOURCE_MODE2_ON_CONVPOOR      = 0x00000040, ///< > 25% of
+   (PSF-weighted) pixels land on convpoor
+   53
+   54     PM_SOURCE_MODE2_PASS1_SRC        = 0x00000080, ///< source
+   detected in first pass analysis
+   55
+   56     PM_SOURCE_MODE2_HAS_BRIGHTER_NEIGHBOR = 0x00000100, ///< peak
+   is not the brightest in its footprint
+   57     PM_SOURCE_MODE2_BRIGHT_NEIGHBOR_1     = 0x00000200, ///< flux_n
+   / (r^2 flux_p) > 1
+   58     PM_SOURCE_MODE2_BRIGHT_NEIGHBOR_10    = 0x00000400, ///< flux_n
+   / (r^2 flux_p) > 10
+   59 } pmSourceMode2;
+   60
+   61 /// Populate header with mask values
+   62 bool pmSourceMasksHeader(
+   63     psMetadata *header                  ///< Header to populate
+   64     );
+   65
+   66
+   67
+   68 #endif
+   Note: See TracBrowser for help on using the browser.
+   View changes...
+
+Download in other formats:
+
+     * Plain Text
+     * Original Format
+     _________________________________________________________________
+
+   Trac Powered 
+
+   Powered by Trac 0.11.2
+   By Edgewall Software.
+
+   Visit the Trac open source project at
+   http://trac.edgewall.org/
