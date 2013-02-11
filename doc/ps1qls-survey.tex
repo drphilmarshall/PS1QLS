@@ -1,0 +1,187 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% PS1QLS: Survey Paper
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[useAMS,usenatbib]{mn2e}
+%% letterpaper
+%% a4paper
+
+% \voffset=-0.8in
+
+% Packages:
+\input psfig.sty
+\usepackage{xspace}
+\usepackage{graphicx}
+
+% Macros:
+\input{macros.tex}
+\input{addresses.tex}
+\newcommand\nodata{ ~$\cdots$~ }%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title[The PS1QLS Survey. I.]
+{The PS1 Quasar Lens Survey. I. Candidate Selection}
+    
+\author[Some guys]{%
+  Some guys, including
+  Eric~P.~Morganson$^{1}$,
+  Philip~J.~Marshall$^{2}$,
+  David W. Hogg$^{3,1}$
+  \newauthor{%
+  and the PS1 Collaboration}
+  \medskip\\
+  $^1$\mpia\\
+  $^2$\oxford\\
+  $^3$\nyu
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+             
+\date{to be submitted to MNRAS}
+             
+\pagerange{\pageref{firstpage}--\pageref{lastpage}}\pubyear{2010}
+
+\maketitle           
+
+\label{firstpage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{abstract}
+
+Gravitationally lensed quasars enable a wide range of astrophysical
+investigations, most of which are currently limited by the available
+sample size. The Pan-STARRS 1 quasar lens search (PS1QLS) aims to supply
+this demand, using the 30,000 square degree, multi-filter, multi-epoch
+``$3\pi$'' imaging dataset of the PS1 project.  In this paper we
+describe: the preparation of the imaging and catalog data in the
+PS1--SDSS DR7 overlap area, our target selection, using SDSS colors,
+SDSS--PS1 variability and PS1 spatial extent, and our robotic approach
+to the analysis of the targets. We show that our target selection
+recovers N\% of the known lenses in the search area, and, using
+realistic synthetic systems, should be X\% complete. 
+
+\end{abstract}
+
+% Full list of options at http://www.journals.uchicago.edu/ApJ/instruct.key.html
+
+\begin{keywords}
+  gravitational lensing
+\end{keywords}
+
+\setcounter{footnote}{1}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  SECTION 1: INTRODUCTION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+\label{sec:intro}
+
+
+% Motivation.
+
+
+% History. Future.
+
+
+% Photometric quasar selection: Richards et al.
+
+
+% Spatial extent: SQLS
+
+
+% Follow-up: SQLS. PS1 as its own follow-up.
+
+
+% Towards automated lens analysis: HAGGLes etc
+
+
+% The PS1QLS series.
+
+This paper is organized as follows... Throughout this paper, and the
+rest of the PS1QLS series, magnitudes are given in the AB system
+\citep{Oke74} and we adopt standard ``concordance'' cosmological
+parameters, i.e. $h=0.7$, $\Omega_m=0.3$ and $\Omega_\Lambda=0.7$, where
+the symbols indicate the Hubble Constant in units of 100 km s$^{-1}$
+Mpc$^{-1}$ and the matter and dark energy density of the Universe in
+units of the critical density \citep[e.g.\ ][]{Kom++09}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  SECTION X: ...
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Section Heading}
+\label{sec:xxx}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  SECTION X: CONCLUSIONS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+In summary, ...
+
+\begin{itemize}
+
+\item We ...
+
+\item The ...
+
+\item The ...
+
+\end{itemize}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  ACKNOWLEDGMENTS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Acknowledgments}
+ 
+We thank XXX for useful discussions and suggestions.
+
+\input{acknowledgments.tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  APPENDICES
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% \appendix
+% 
+% \section{}
+% \label{sec:appendix}
+% 
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  REFERENCES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% MNRAS does not use bibtex, input .bbl file instead. 
+% Generate this in the makefile using bubble script in scriptutils:
+
+%   bubble -f PS1QLS-survey.tex references.bib 
+
+\bibliographystyle{apj}
+\bibliography{references}
+%\input{PS1QLS-survey.bbl}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\label{lastpage}
+\bsp
+
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
