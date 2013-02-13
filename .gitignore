@@ -1,2 +1,6 @@
 candidates
 knownlenses
+*.log
+*.aux
+*.dvi
+*.pdf
