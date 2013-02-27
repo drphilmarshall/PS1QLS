@@ -20,6 +20,7 @@
 #
 # Objects 1-5 are 'personal favorites'
 # Objects 6-28 are z>1 spectroscopic quasars
+# Objects 1, 3 and 26 are known non-lenses from cross-matching with SQLS failures
 # ============================================================================
 # index   objid                priorityid          ra             dec          
   1       587730847424905311   28307024710390038   314.46866      0.10980109   
