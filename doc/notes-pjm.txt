@@ -596,4 +596,170 @@ setenv PS1QLS_DATA_DIR /a77d1/PS1QLS
 # Eric, managed by Phil.
 
 # ============================================================================
+# 2013-04-23 (Tuesday) 07:31 BST
+
+# Large image of a CFHTLS field observed during 3pi survey. Eric downloaded
+# the stacked images:
+du -sch /a77d1/PS1_QLS/WIDEFIELD/WF/WF_120_-30/WFJ134.7115-3.5750/WFJ134.7115-3.5750_STACK/*unconv.fits 
+
+# 9.9M    /a77d1/PS1_QLS/WIDEFIELD/WF/WF_120_-30/WFJ134.7115-3.5750/WFJ134.7115-3.5750_STACK/1000112_1_RINGS.V3.skycell.1266.018.stk.1000767.unconv.fits
+# 9.3M    /a77d1/PS1_QLS/WIDEFIELD/WF/WF_120_-30/WFJ134.7115-3.5750/WFJ134.7115-3.5750_STACK/1000113_1_RINGS.V3.skycell.1266.018.stk.999169.unconv.fits
+# 9.5M    /a77d1/PS1_QLS/WIDEFIELD/WF/WF_120_-30/WFJ134.7115-3.5750/WFJ134.7115-3.5750_STACK/1000114_1_RINGS.V3.skycell.1266.018.stk.999755.unconv.fits
+# 7.4M    /a77d1/PS1_QLS/WIDEFIELD/WF/WF_120_-30/WFJ134.7115-3.5750/WFJ134.7115-3.5750_STACK/1000115_1_RINGS.V3.skycell.1266.018.stk.997200.unconv.fits
+# 9.2M    /a77d1/PS1_QLS/WIDEFIELD/WF/WF_120_-30/WFJ134.7115-3.5750/WFJ134.7115-3.5750_STACK/1000116_1_RINGS.V3.skycell.1266.018.stk.1000267.unconv.fits
+
+# We also have the V3 postage stamps, at all epochs.
+
+# First, copy over the stacked images and make a gri composite image.
+
+mkdir -p $PS1QLS_DIR/PROJECTS/WF
+cd $PS1QLS_DIR/PROJECTS/WF
+
+mpia-open-tunnel
+rsync -avz -e "ssh -p 12346" "marshall@localhost:/a77d1/PS1_QLS/WIDEFIELD/WF/WF_120_-30/WFJ134.7115-3.5750/WFJ134.7115-3.5750_STACK/*.unconv.fits" .
+
+# Make this an alias! mpia-rsync.
+
+# Set up links:
+
+set field = "PS1J134.7115-3.5750"
+set filters = ( None g r i z Y )
+foreach k ( `seq 2 6` )
+  set target = `ls 100011${k}_1_RINGS.V3.skycell.1266.018.stk.*.unconv.fits` 
+  set linkname = "${field}_${filters[$k]}_sci.fits"
+  ln -s $target $linkname
+  ls $linkname
+end
+
+# Quick look with ds9:
+
+ds9 -rgb -red PS1J134.7115-3.5750_i_sci.fits \
+       -green PS1J134.7115-3.5750_r_sci.fits \
+        -blue PS1J134.7115-3.5750_g_sci.fits &
+        
+# Adjusted scales to limits -100:5000, sqrt stretched, zoomed and panned to
+# center on data (!). Saved to PS1J134.7115-3.5750_gri_ds9.png
+
+# Now try using humvi...
+
+compose.py  -v -s 0.6,0.8,1.0 -z 0.0 -p 1.7,1e-8 -m -1.0 \
+   -o  PS1J134.7115-3.5750_gri.png \
+       PS1J134.7115-3.5750_i_sci.fits \
+       PS1J134.7115-3.5750_r_sci.fits \
+       PS1J134.7115-3.5750_g_sci.fits
+
+# OK, this isn't bad - but to compare in detail with CFHTLS, will need a
+# smaller cutout.
+
+ln -s ~/public_html/outreach/WheresWal-lens/wheres_wal-lens_gri_25x25arcmin.png .
+ln -s ~/public_html/outreach/WheresWal-lens/data/wheres_wal-lens_*.fits .
+
+# Pick interesting point in ds9 - an elliptical galaxy between some stars
+# of various colours, and an edge on spiral:
+set ra = 134.59985
+set dec = -3.5163149
+
+# Size of field is about 240 arcsec
+set size = 240
+
+proto_cutout.py -v -n PS1J134.59985_-3.51631_PS1 $ra $dec $size \
+    PS1J134.7115-3.5750_?_sci.fits
+
+# PS1 cutouts:
+# Making 240.0 arcsec cutouts centred on 134.59985 , -3.5163149 degrees
+# from the following input files:
+#    ['PS1J134.7115-3.5750_Y_sci.fits', 'PS1J134.7115-3.5750_g_sci.fits', 'PS1J134.7115-3.5750_i_sci.fits', 'PS1J134.7115-3.5750_r_sci.fits', 'PS1J134.7115-3.5750_z_sci.fits']
+# Output files will be prefixed with PS1J134.59985_-3.51631_PS1
+# Read in header from extension 1 of PS1J134.7115-3.5750_Y_sci.fits
+# Pixel scale = 0.250000006054
+# Cutout size  = 959 pixels, or 239.750005805 arcsec
+# Object centre is not in footprint of image, skipping
+
+# Looks like bad WCS :-(
+
+proto_cutout.py -v -n PS1J134.59985_-3.51631_CFHTLS $ra $dec $size \
+    wheres_wal-lens_*.fits
+    
+# CFHTLS cutouts:
+# PS1J134.59985_-3.51631_CFHTLS_240x240arcsec_99999.90000_g.MP9401_sci.fits 
+# PS1J134.59985_-3.51631_CFHTLS_240x240arcsec_99999.90000_i.MP9701_sci.fits 
+# PS1J134.59985_-3.51631_CFHTLS_240x240arcsec_99999.90000_r.MP9601_sci.fits 
+
+
+# ============================================================================
+# 2013-07-29 (Monday) 11:54 PDT
+
+# Select LRGs from CFHTLS to paste quasars on top of. 
+# http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/community/CFHTLens/query.html
+
+# Criteria for LRGs:
+
+# SELECT
+# top 10000
+# id, ALPHA_J2000, DELTA_J2000, FLUX_RADIUS, CLASS_STAR, fitclass, Z_B, Z_B_MIN, Z_B_MAX, T_B, star_flag, MAG_u, MAG_g, MAG_r, MAG_i, MAG_y, MAG_z
+# FROM
+# cfht.clens
+# WHERE
+# fitclass>=0
+# AND fitclass<=0
+# AND T_B<=1.5
+# AND star_flag<=0.1
+# AND MAG_i>=0.0
+# AND MAG_i<=22.5
+
+# Notes from docs:
+#
+#   - FITCLASS: Object classification as returned by lensfit.
+#     Classification values are
+#      0: galaxy
+#      1: star
+#     -1: bad fit: no useable data 
+#     -2: bad fit: blended object
+#     -3: bad fit: miscellaneous reason
+#     -4: bad fit: chi-squared exceeds a critical value
+
+#   - T_B: BPZ spectral type. 1=CWW-Ell, 2=CWW-Sbc, 3=CWW-Scd, 4=CWW-Im,
+#     5=KIN-SB3, 6=KIN-SB2. Note that we use a recalibrated template set
+#     described in Capak et al. (2004) and that the templates are
+#     interpolated, hence fractional types occur.
+
+#   - star_flag: Stars and galaxies are separated using a combination of
+#     size, i/y-band magnitude and colour information. For i<21, all
+#     objects with size smaller than the PSF are classified as stars. For
+#     i>23, all objects are classified as galaxies. In the range 21<i<23,
+#     a star is defined as size<PSF and chi2_star<2.0*chi2_gal, where the
+#     chi2's are the best fit chi2's from the galaxy and star libraries
+#     given by LePhare. NOTE: star_flag is optimized for galaxy studies,
+#     to keep an almost 100% complete galaxy sample with low (but not
+#     vanishing) stellar contamination. CLASS_STAR usually gives a cleaner
+#     star sample, but can lead to serious incompleteness in a galaxy
+#     sample.
+
+# Save:
+
+mkdir -p PROJECTS/SIMS/lenses
+
+wget -O CFHTLS_LRGs_2013-07-29.txt \
+"http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/community/CFHTLens/cgi/queryt.pl?REQUEST=doQuery&LANG=ADQL&method=sync&format=ascii&query=SELECT%0D%0Atop+10000%0D%0Aid%2C+ALPHA_J2000%2C+DELTA_J2000%2C+FLUX_RADIUS%2C+CLASS_STAR%2C+fitclass%2C+Z_B%2C+Z_B_MIN%2C+Z_B_MAX%2C+T_B%2C+star_flag%2C+MAG_u%2C+MAG_g%2C+MAG_r%2C+MAG_i%2C+MAG_y%2C+MAG_z%0D%0AFROM%0D%0Acfht.clens%0D%0AWHERE%0D%0Afitclass%3E%3D0%0D%0AAND+fitclass%3C%3D0%0D%0AAND+T_B%3C%3D1.5%0D%0AAND+star_flag%3C%3D0.1%0D%0AAND+MAG_i%3E%3D0.0%0D%0AAND+MAG_i%3C%3D22.5%0D%0A"
+
+# SERVER DOWN - NEED TO REPEAT THIS REQUEST...
+# 2013-07-29 13:25:52 ERROR 503: Service Unavailable.
+
+# Get an all galaxy sample for comparison, same mag limit, all types.
+
+wget -O CFHTLS_galaxies_2013-07-29.txt \
+"http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/community/CFHTLens/cgi/queryt.pl?REQUEST=doQuery&LANG=ADQL&method=sync&format=ascii&query=SELECT%0D%0Atop+10000%0D%0Aid%2C+ALPHA_J2000%2C+DELTA_J2000%2C+FLUX_RADIUS%2C+CLASS_STAR%2C+fitclass%2C+Z_B%2C+Z_B_MIN%2C+Z_B_MAX%2C+T_B%2C+star_flag%2C+MAG_u%2C+MAG_g%2C+MAG_r%2C+MAG_i%2C+MAG_y%2C+MAG_z%0D%0AFROM%0D%0Acfht.clens%0D%0AWHERE%0D%0Afitclass%3E%3D0%0D%0AAND+fitclass%3C%3D0%0D%0AAND+star_flag%3C%3D0.1%0D%0AAND+MAG_i%3E%3D0.0%0D%0AAND+MAG_i%3C%3D22.5%0D%0A"
+
+# THIS ONE IS DONE.
+
+
+# Corner plot! Need sizes in arcsec first. Also, lose some info to save space:
+
+foreach file ( CFHTLS*txt )
+    echo "#       RA         Dec    Reff zphot type      u      g      r       i      z      y" > junk
+    tail -n +2 $file | awk '{print $2,$3,$4*0.286,$7,$10,$12,$13,$14,$15,$16,$17}' >> junk
+    du -h $file junk
+end
+
+# ============================================================================
 FINISH:
