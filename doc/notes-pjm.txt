@@ -737,7 +737,7 @@ proto_cutout.py -v -n PS1J134.59985_-3.51631_CFHTLS $ra $dec $size \
 
 # Save:
 
-mkdir -p PROJECTS/SIMS/lenses
+mkdirf -p PROJECTS/SIMS/lenses
 
 wget -O CFHTLS_LRGs_2013-07-29.txt \
 "http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/community/CFHTLens/cgi/queryt.pl?REQUEST=doQuery&LANG=ADQL&method=sync&format=ascii&query=SELECT%0D%0Atop+10000%0D%0Aid%2C+ALPHA_J2000%2C+DELTA_J2000%2C+FLUX_RADIUS%2C+CLASS_STAR%2C+fitclass%2C+Z_B%2C+Z_B_MIN%2C+Z_B_MAX%2C+T_B%2C+star_flag%2C+MAG_u%2C+MAG_g%2C+MAG_r%2C+MAG_i%2C+MAG_y%2C+MAG_z%0D%0AFROM%0D%0Acfht.clens%0D%0AWHERE%0D%0Afitclass%3E%3D0%0D%0AAND+fitclass%3C%3D0%0D%0AAND+T_B%3C%3D1.5%0D%0AAND+star_flag%3C%3D0.1%0D%0AAND+MAG_i%3E%3D0.0%0D%0AAND+MAG_i%3C%3D22.5%0D%0A"
@@ -745,21 +745,38 @@ wget -O CFHTLS_LRGs_2013-07-29.txt \
 # SERVER DOWN - NEED TO REPEAT THIS REQUEST...
 # 2013-07-29 13:25:52 ERROR 503: Service Unavailable.
 
+# Resubmitted job in batch mode: CFHTLens_2013-08-05T17-46-10.tsv
+
+mv CFHTLens_2013-08-05T17-46-10.tsv CFHTLS_LRGs_2013-07-29.txt
+
 # Get an all galaxy sample for comparison, same mag limit, all types.
 
 wget -O CFHTLS_galaxies_2013-07-29.txt \
 "http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/community/CFHTLens/cgi/queryt.pl?REQUEST=doQuery&LANG=ADQL&method=sync&format=ascii&query=SELECT%0D%0Atop+10000%0D%0Aid%2C+ALPHA_J2000%2C+DELTA_J2000%2C+FLUX_RADIUS%2C+CLASS_STAR%2C+fitclass%2C+Z_B%2C+Z_B_MIN%2C+Z_B_MAX%2C+T_B%2C+star_flag%2C+MAG_u%2C+MAG_g%2C+MAG_r%2C+MAG_i%2C+MAG_y%2C+MAG_z%0D%0AFROM%0D%0Acfht.clens%0D%0AWHERE%0D%0Afitclass%3E%3D0%0D%0AAND+fitclass%3C%3D0%0D%0AAND+star_flag%3C%3D0.1%0D%0AAND+MAG_i%3E%3D0.0%0D%0AAND+MAG_i%3C%3D22.5%0D%0A"
 
 # THIS ONE IS DONE.
+# Um - except we didnt insist on meaningful i band mags again. 
+
+# Resubmitted job in batch mode: CFHTLens_2013-08-05T17-46-10.tsv
+
+mv CFHTLens_2013-08-05T18-38-03.tsv CFHTLS_galaxies_2013-07-29.txt
 
 
 # Corner plot! Need sizes in arcsec first. Also, lose some info to save space:
 
 foreach file ( CFHTLS*txt )
-    echo "#       RA         Dec    Reff zphot type      u      g      r       i      z      y" > junk
-    tail -n +2 $file | awk '{print $2,$3,$4*0.286,$7,$10,$12,$13,$14,$15,$16,$17}' >> junk
-    du -h $file junk
+    echo '# $R_{\rm eff} (")$,   $z_{\rm phot}$,  Type,   $i$,    $g-r$,    $r-i$' > junk
+    echo '# 0.0,2.9,                0.0,1.5,        0.0,5.0,        15.0,23.0,             -6.0,6.0,                -6.0,6.0' >> junk
+    tail -n +2 $file | awk '{print $4*0.286,$7,$10,$15,$13-$14,$14-$15}' >> junk
+    mv junk $file:r.cpt
+    du -h $file $file:r.cpt
 end
+
+CornerPlotter.py -o CFHTLS_LRGs.png \
+   CFHTLS_galaxies_2013-07-29.cpt,blue,outlines,'CFHTLS galaxies' \
+   CFHTLS_LRGs_2013-07-29.cpt,red,shaded,'CFHTLS LRGs'
+
+# OK good - check this in and report to Eric via issue.
 
 # ============================================================================
 FINISH:
