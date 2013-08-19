@@ -1,0 +1,15 @@
+# Library of 10,000 SDSS Srtipe 82 spectroscopic quasars, as observed 
+# in grizY by PS1.
+# Matching to OM10 simulated lensed sources will be done by redshift.
+#
+# Compiled by Morganson & Marshall 2013 based on ...
+#
+# Notes:
+# - PS1 magnitudes are ...
+# - IDs are ...
+# - Made from individual catalogs in redshift bins.
+# - Variability parameters are from McLeod et al, measured in SDSS X band but
+#   assumed to hold for all PS1 bands.
+#
+# SDSS_ID  PS1_ID    ra   dec   redshift  g_PS1  r_PS1  i_PS1  z_PS1  Y_PS1  tau   sf_inf
+
