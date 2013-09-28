@@ -779,4 +779,35 @@ CornerPlotter.py -o CFHTLS_LRGs.png \
 # OK good - check this in and report to Eric via issue.
 
 # ============================================================================
+# 2013-09-27 (Friday) 19:59 PDT
+
+# OM10 lenses, need a CFHTLS galaxy each, so that QSO images can be assigned
+# RA and Dec positions. Need a piece of code that reads in the OM10 catalog, 
+# and the CFHTLS LRG library, and outputs a mock lens object catalog. This
+# program should also read in a source library (SDSS stripe 82 quasars 
+# observed with PS1) and assign mean magnitudes to each image, too. 
+
+# OM10 database from web is in slightly clunky form - provide python for
+# querying it, as astropy table. We only want to do two things:
+
+# 1) Select PS1-3pi lens systems
+# 2) Loop over them, associating them with CFHTLS lenses and SDSS sources.
+
+# OK, now have OM10 github repo ready to use. Write PS1QLS script to start
+# making catalogs of simulated lenses.
+
+# Plan:
+
+# 1. Read in OM10 catalog and make PS1 3pi selection, of around 1000 galaxies
+# 2. Read in the CFHTLS LRG catalog
+# 3. For each OM10 lens, find an LRG that matches in redshift and i mag
+# 4. Write out selected CFHTLS LRGs in same format as parent
+# 5. Compute RA and Dec of each quasar image
+# 6. Write out QSO image catalog: include RA, Dec, i-band magnitude;
+#    and also OM10 ID, dtheta, nim, md, ms, zd, zs and then CFHTLS LRG ID
+
+
+
+
+# ============================================================================
 FINISH:
