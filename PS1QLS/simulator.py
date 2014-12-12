@@ -64,7 +64,8 @@ def simulator():
     PS1QLS.write_LRG_header(LRGsimcatalog)
     PS1QLS.write_sim_header(simcatalog)
 
-    # Read in LRGs as a multi-dimensional array:
+    # Read in LRGs as a multi-dimensional array, and add a column for
+    # whether each one has been matched already:
     LRGdb = PS1QLS.read_LRGs(LRGcatalog)
 
     # Loop over lenses, finding an LRG for each one:
@@ -90,7 +91,7 @@ def simulator():
            IMGra,IMGdec = PS1QLS.apply_radec_offset(LRG.ra,LRG.dec,dra,ddec)
            print "  so is at RA,dec = ",IMGra,IMGdec
 
-           PS1QLS.write_sim_line(IMGra,IMGdec,lens,LRG)
+           PS1QLS.write_sim_line(IMGra,IMGdec,i,lens,LRG)
 
     # ------------------------------------------------------------------
 

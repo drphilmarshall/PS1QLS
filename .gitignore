@@ -1,5 +1,6 @@
 HIZQ
 KNOWNLENSES
+*.pyc
 *.log
 *.aux
 *.dvi

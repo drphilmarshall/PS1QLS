@@ -806,8 +806,168 @@ CornerPlotter.py -o CFHTLS_LRGs.png \
 # 6. Write out QSO image catalog: include RA, Dec, i-band magnitude;
 #    and also OM10 ID, dtheta, nim, md, ms, zd, zs and then CFHTLS LRG ID
 
+# ============================================================================
+# 2013-10-17 (Thursday) 13:58 PDT
 
+# Take a look at Kasper's lenses. HumVI not quite optimized yet, but close
+# enough for a quick look.
 
+# Message from Eric:
+
+#    It finished. Unfortunately, the psf-maker did not work (possibly due to a
+#    format change in postage stamp names). But the stamps are in
+#    /a77d1/PS1_QLS/ps1qls/PROJECTS/KBS-STRIPE82/kbs-stripe82
+
+# We want to look at object 52 in particular. How to interpret data directory?
+
+cd $PS1QLS_DATA_DIR/ps1qls/PROJECTS/KBS-STRIPE82/kbs-stripe82/ 
+ls
+# kbs-stripe82_0_0    kbs-stripe82_300_0    kbs-stripe82_330_0
+# kbs-stripe82_0_-30  kbs-stripe82_300_-30  kbs-stripe82_330_-30
+# kbs-stripe82_30_0   kbs-stripe82_30_-30   kbs-stripe82.txt
+
+# Look at catalog:
+
+head kbs-stripe82.txt
+# 314.46866 0.10980109 kbs-stripe82J314.4687+0.1098 kbs-stripe82_300_0    20:57:52.47840+00:06:35.28392 kbs-stripe82J2057+0006
+# 53.20213 -0.3653704 kbs-stripe82J53.2021-0.3654 kbs-stripe82_30_-30     03:32:48.51120-00:21:55.33344 kbs-stripe82J0332-0021
+# 313.38757 -1.0162246 kbs-stripe82J313.3876-1.0162 kbs-stripe82_300_-30  20:53:33.01680-01:00:58.40856 kbs-stripe82J2053-0100
+# 331.25497 0.52302201 kbs-stripe82J331.2550+0.5230 kbs-stripe82_330_0    22:05:1.19280+00:31:22.87924 kbs-stripe82J2205+0031
+# 35.201385 -0.47599432 kbs-stripe82J35.2014-0.4760 kbs-stripe82_30_-30   02:20:48.33240-00:28:33.57955 kbs-stripe82J0220-0028
+# 16.2803823 0.41126949 kbs-stripe82J16.2804+0.4113 kbs-stripe82_0_0      01:05:7.29175+00:24:40.57016 kbs-stripe82J0105+0024
+# 2.56871133 0.20768695 kbs-stripe82J2.5687+0.2077 kbs-stripe82_0_0       00:10:16.49072+00:12:27.67302 kbs-stripe82J0010+0012
+# 331.03966347 -0.13770241 kbs-stripe82J331.0397-0.1377 kbs-stripe82_330_-30     22:04:9.51923-00:08:15.72868 kbs-stripe82J2204-0008
+# 350.60691496 -0.46557767 kbs-stripe82J350.6069-0.4656 kbs-stripe82_330_-30     23:22:25.65959-00:27:56.07961 kbs-stripe82J2322-0027
+# 2.59227832 -0.61700182 kbs-stripe82J2.5923-0.6170 kbs-stripe82_0_-30    00:10:22.14680-00:37:1.20655 kbs-stripe82J0010-0037
+
+# Looks like ra, dec, IAUnameD, field, radecstring, IAUname
+# No object name! Crap. How many rows?
+
+wc -l kbs-stripe82.txt
+# 387 kbs-stripe82.txt
+
+# The input catalog is in the directory above:
+
+head -100 ../kbs-stripe82-targets.txt
+
+# # ============================================================================
+# # KBS catalog of QSO Lens candidates in SDSS Stripe 82
+# #
+# # Selected by SDSS color, variability and spatial extent 
+# # by Kasper Schmidt, MPIA, Sept 2009.
+# #
+# # Priority id characters are set according to:
+# #      c1: 2 = personal favorite, 1 = z>1 spectroscopic quasar, " " otherwise
+# #    c2-5: 100 - UKIDSS H-band magnitude, 2dp, point removed.
+# #    c6-9: 4-digit integer distance from the stellar locus
+# #  c10-13: photometrix redshift, 2dp, point removed
+# #  c14-17: fraction of epochs with object detected as extended, 2dp, point removed
+# # 
+# # eg 18142001518520018:
+# #    1-> Spectroscopic QSO, not a 'personal favorite'
+# #     8142-> UKIDSS H-band magnitude of 100-81.42 = 18.58
+# #         0015-> 15 times 'closer' to the quasar locus than the stellar locus
+# #             1852-> Estimated photometric redshift of 1.852
+# #                 0018-> 18 times as many Stripe 82 epochs with galaxy morphology (type = 3) than point source (type = 6)
+# #
+# # Objects 1-5 are 'personal favorites'
+# # Objects 6-28 are z>1 spectroscopic quasars
+# # Objects 1, 3 and 26 are known non-lenses from cross-matching with SQLS failures
+# # ============================================================================
+# # index   objid                priorityid          ra             dec          
+#   1       587730847424905311   28307024710390038   314.46866      0.10980109   
+#   2       588015508755775570   28223052419080255    53.20213       -0.3653704   
+#   3       587731172232135333   28198010123940667   313.38757      -1.0162246   
+#   4       587734305413726557   28184014016370613   331.25497      0.52302201   
+#   5       587731512076075139   28164010819880032    35.201385      -0.47599432  
+#   6       587731513141559419   18376002311520013    16.2803823     0.41126949   
+#   7       588015509270495301   18319003126990003     2.56871133     0.20768695   
+#   8       587731186191237426   18319000828350003   331.03966347   -0.13770241  
+#   9       587731185662951500   18318021115240003   350.60691496   -0.46557767  
+#   10      587731185668194449   18312148931960003     2.59227832     -0.61700182  
+
+# These match up row by  row - check total matches downloaded list:
+
+grep -v '#' ../kbs-stripe82-targets.txt  | wc -l
+# 387
+
+# OK, good. 
+# Need a proto script that pulls out an object from a target list, and makes a
+# color png. Need to be able to select by object number (ie, row number). 
+
+# Copy data to laptop and develop there? It's a smallish dataset, no? 253Mb.
+# Do it, for development purposes: run scripts at MPIA as well!
+
+# 2013-10-25 (Friday) 22:11 PDT
+
+# OK, got data! Try out script:
+
+cd $PS1QLS_DIR/PROJECTS/KBS-STRIPE82
+
+proto_make_stack_color_pngs.csh -p kbs-stripe82 -f gri -i 52
+
+# OK, that works! Naming system is kind of annoying, such a long prefix.
+# That should just be PS1, I think. 
+
+# Anyway, we need an internal system. Would be good if 
+# kbs-stripe82/kbs-stripe82.txt had the object name in it. Ah well.
+# Make all pngs, and then scrape them out in order.
+
+set logfile = kbs-stripe82-pngs.log
+proto_make_stack_color_pngs.csh -p kbs-stripe82 -f gri >& $logfile &
+
+# Now make a gallery directory, with links to pngs in it:
+
+mkdir -p gallery
+
+set master = kbs-stripe82-targets.txt
+set maincat = kbs-stripe82/kbs-stripe82.txt 
+
+set N = `grep -v '#' $master | wc -l`
+set IDs       = `seq    $N`
+set IDstrings = `seq -w $N`
+
+foreach k ( `seq $N` )
+  set x = `grep -v '#' $master | awk '{if ($1 == '$IDs[$k]') print $4,$5}'`
+  set y = `grep $x[1] $maincat | awk '{print $3,$4}'`
+  if ($#y > 2) then
+     echo "ERROR: multiple RA instance, y = $y"
+     break
+  endif   
+  set png = $cwd/kbs-stripe82/${y[2]}/${y[1]}/${y[1]}_STACK_gri.png
+  set newpng = gallery/OBJ${IDstrings[$k]}_PS1_gri.png
+  \rm -f $newpng
+  if ( -e $png ) then
+      ln -s -v $png $newpng
+  endif
+end
+
+# Now make gallery:
+
+cd gallery 
+
+gallery.pl -pdf -x 2 -y 2 -t -o PS1_gri_gallery.pdf *.png
+
+# Nice to make SDSS comparison...
+
+cd ../
+foreach k ( `seq $N` )
+  set x = `grep -v '#' $master | awk '{if ($1 == '$IDs[$k]') print $4,$5}'`
+  askSDSS -f -w 0.17 $x > junk
+  set jpg = `grep 'arcmin.jpg' junk`
+  set newjpg = gallery/OBJ${IDstrings[$k]}_SDSS_gri.jpg
+  mv -v $jpg $newjpg
+end
+\rm junk
+
+# And make comparison gallery:
+
+cd gallery 
+
+gallery.pl -pdf -x 2 -y 2 -t -o PS1-vs-SDSS_gri_gallery.pdf *.??g
+
+# Hmm - not all objects have PS1 imaging...
+# Improvement in image quality over SDSS looks minimal :-/
 
 # ============================================================================
 FINISH:
