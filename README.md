@@ -13,7 +13,7 @@ wiki](http://ps1sc.ifa.hawaii.edu/PS1wiki/index.php/PS1QLS)
 
 ## Citation, Licensing etc
 
-This is work in progress. If you are interested in finding and using lenses in the PS1 survey, please do drop us a note in the [issues!]() If you make use of any of the ideas or code in this repository, please cite us as (Marshall et al in preparation). The code is available via the MIT licence.
+This is work in progress. If you are interested in finding and using lenses in the PS1 survey, please do drop us a note in the [issues!](https://github.com/drphilmarshall/PS1QLS/issues) If you make use of any of the ideas or code in this repository, please cite us as (Marshall et al in preparation). The code is available via the MIT licence.
 
 ## Using the Code
 
