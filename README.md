@@ -2,8 +2,10 @@
 
 The Pan-STARRS 1 Quasar Lens Search, documents and analysis code.
 
-See also our online notebook hosted at the [PS1SC
-wiki](http://ps1sc.ifa.hawaii.edu/PS1wiki/index.php/PS1QLS)
+If you are a PS1SC member, you can read our original notes and plans at the [PS1SC
+wiki](http://ps1sc.ifa.hawaii.edu/PS1wiki/index.php/PS1QLS). More recently, you can follow our progress here:
+
+* Investigating catalog selection in the [SDSS DR10 testbed](https://github.com/drphilmarshall/PS1QLS/blob/master/PROJECTS/SDSS/README.md)
  
 ## People
 
