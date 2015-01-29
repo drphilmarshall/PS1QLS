@@ -5,3 +5,4 @@ KNOWNLENSES
 *.aux
 *.dvi
 *.pdf
+.ipynb_checkpoints
