@@ -121,7 +121,32 @@ class Classifier(object):
         plt.plot(fpr,tpr,'b--')
         plt.xlabel('FPR')
         plt.ylabel('TPR')
-        return fpr,tpr
+        return fpr, tpr
+    
+    def make_pc_plot(self, truth, abundance=1e-3):
+        """
+        Plots purity against completeness, assuming a natural abundance of lenses.
+        
+        Parameters
+        ----------
+        truth: ndarray
+            True labels for the test dataset objects.
+        abundance: float
+            Fraction of all objects in the expected parent dataset that are actually lenses.
+            
+        Returns
+        -------
+        c: ndarray
+            Array of completeness values
+        p: ndarray
+            Array of purity values
+            
+        Notes
+        -----
+        
+        """
+        pass
+        return
     
     def save(self,pkl_fname='classifiers.pkl'):
         outfile = open(pkl_fname,'wb')
