@@ -143,7 +143,8 @@ class Classifier(object):
             
         Notes
         -----
-        
+        Definition of Purity : (True Positive/(True Positive+False Positive))
+        Definition of Completeness : (True Positive/(True Positive+False Negative))
         """
         pass
         return
