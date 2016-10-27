@@ -133,7 +133,15 @@ class Classifier(object):
             True labels for the test dataset objects.
         abundance: float
             Fraction of all objects in the expected parent dataset that are actually lenses.
-            
+        // code starts here
+        
+        purity, completeness, _ = sklearn.metrics.precision_recall_curve(truth, self.lQSO_probs, pos_label=1)
+        plt.title('Purity-Completeness Curve')
+        plt.plot(purity,completeness,'b--')
+        plt.xlabel('purity')
+        plt.ylabel('completeness')
+        return completeness, purity
+        // code ends here
         Returns
         -------
         c: ndarray
