@@ -135,7 +135,10 @@ class Classifier(object):
             Fraction of all objects in the expected parent dataset that are actually lenses.
         // code starts here
         
-        purity, completeness, _ = sklearn.metrics.precision_recall_curve(truth, self.lQSO_probs, pos_label=1)
+        precision, recall, _ = sklearn.metrics.precision_recall_curve(truth, self.lQSO_probs, pos_label=1)
+        fpr, tpr, _ = metrics.roc_curve(truth,self.lQSO_probs,pos_label=1)
+        completeness = recall
+        purity = (tpr*abundance)/(tpr*abundance + fpr*(1-abundance))
         plt.title('Purity-Completeness Curve')
         plt.plot(purity,completeness,'b--')
         plt.xlabel('purity')
