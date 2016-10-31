@@ -121,7 +121,44 @@ class Classifier(object):
         plt.plot(fpr,tpr,'b--')
         plt.xlabel('FPR')
         plt.ylabel('TPR')
-        return fpr,tpr
+        return fpr, tpr
+    
+    def make_pc_plot(self, truth, abundance=1e-3):
+        """
+        Plots purity against completeness, assuming a natural abundance of lenses.
+        
+        Parameters
+        ----------
+        truth: ndarray
+            True labels for the test dataset objects.
+        abundance: float
+            Fraction of all objects in the expected parent dataset that are actually lenses.
+        // code starts here
+        
+        precision, recall, _ = sklearn.metrics.precision_recall_curve(truth, self.lQSO_probs, pos_label=1)
+        fpr, tpr, _ = metrics.roc_curve(truth,self.lQSO_probs,pos_label=1)
+        completeness = recall
+        purity = (tpr*abundance)/(tpr*abundance + fpr*(1-abundance))
+        plt.title('Purity-Completeness Curve')
+        plt.plot(purity,completeness,'b--')
+        plt.xlabel('purity')
+        plt.ylabel('completeness')
+        return completeness, purity
+        // code ends here
+        Returns
+        -------
+        c: ndarray
+            Array of completeness values
+        p: ndarray
+            Array of purity values
+            
+        Notes
+        -----
+        Definition of Purity : (True Positive/(True Positive+False Positive))
+        Definition of Completeness : (True Positive/(True Positive+False Negative))
+        """
+        pass
+        return
     
     def save(self,pkl_fname='classifiers.pkl'):
         outfile = open(pkl_fname,'wb')
