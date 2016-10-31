@@ -86,7 +86,7 @@ class Classifier(object):
         return
     
     def RFtrain(self,train,truth):
-        tunedRF = grid_search.GridSearchCV(self.trialRF, self.RF_params, score_func=metrics.accuracy_score,\
+        tunedRF = grid_search.GridSearchCV(self.trialRF, self.RF_params,\
                                     n_jobs = -1, cv = 3,verbose=1)
         self.optRF = tunedRF.fit(train, truth)
         return
